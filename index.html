@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Vanilla Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- CSS immer im Head -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- JS kann hier oder am Ende vom Body stehen -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Dashboard</div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                    <li><a href="#" class="nav-link" data-page="stats">Statistiken</a></li>
+                    <li><a href="#" class="nav-link" data-page="world">World</a></li>
+                    <li><a href="#" class="nav-link" data-page="game">Game</a></li>
+                    <li><a href="#" class="nav-link" data-page="settings">Einstellungen</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="content-area">
+            <!-- Hier wird der Inhalt per JS injiziert -->
+            <h1>Willkommen</h1>
+            <p>Wähle einen Menüpunkt aus.</p>
+        </main>
+    </div>
+
+    <script src="spa-kernel.js"></script>
+</body>
+
+</html>

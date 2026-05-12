@@ -1,0 +1,93 @@
+<h1>Wo war ich?</h1>
+
+
+<style class="dynamic-style">
+    /* Der Wrapper sorgt dafür, dass die Karte zentriert oder füllend ist */
+    .map-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        /* Wichtig: Content-Area muss eine Höhe haben */
+        width: 100%;
+    }
+
+    #map {
+        height: 80vh;
+        /* 80% der Bildschirmhöhe */
+        width: 100%;
+        /* 90% der Breite */
+        border-radius: 0px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+</style>
+
+<div>
+    <div class="map-wrapper">
+        <div id="map"></div>
+    </div>
+
+    <script>
+
+        // Karte initialisieren
+        const map = L.map("map", {
+            minZoom: 2,
+            maxZoom: 19,
+            zoomControl: true
+        }).setView([20, 0], 2);
+
+        map.setMaxBounds([[-90, -180], [90, 180]]);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap"
+        }).addTo(map);
+
+        // WICHTIG: Speichere die Instanz, damit wir sie später löschen können
+        window._currentMap = map;
+
+        // JSON laden und Marker setzen
+        async function loadVisitedPlaces() {
+            const response = await fetch("visited.json");
+            const places = await response.json();
+
+            places.forEach(place => {
+                L.marker([place.lat, place.lon])
+                    .addTo(map)
+                    .bindPopup(
+                        `<b>${place.name}</b><br>${place.country}<br>Besucht: ${place.year}`
+                    );
+            });
+        }
+
+        // loadVisitedPlaces();
+
+        async function loadFromGoogleSheet() {
+            const url = "https://docs.google.com/spreadsheets/d/1yxphywEB865V9M6Xm3EX4UmlHWHsfbGAKl1yZWKHtHE/gviz/tq?tqx=out:json";
+            const response = await fetch(url);
+            const text = await response.text();
+
+            // Google liefert JSON in einer Funktion verpackt → extrahieren
+            const json = JSON.parse(text.substring(47, text.length - 2));
+
+            const rows = json.table.rows.map(r => ({
+                name: r.c[0]?.v,
+                country: r.c[1]?.v,
+                year: r.c[2]?.v,
+                lat: r.c[3]?.v,
+                lon: r.c[4]?.v
+            }));
+
+            rows.forEach(place => {
+                L.marker([place.lat, place.lon])
+                    .addTo(map)
+                    .bindPopup(
+                        `<b>${place.name}</b><br>${place.country}<br>${place.year}`
+                    );
+            });
+        }
+
+        loadFromGoogleSheet();
+
+    </script>
+</div>
