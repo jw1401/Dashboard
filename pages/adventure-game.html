@@ -1,0 +1,182 @@
+<h1>The Golden Knight</h1>
+
+<style class="dynamic-style">
+    canvas {
+        image-rendering: pixelated;
+        background: #000;
+    }
+</style>
+
+<div>
+
+    <canvas id="game" width="512" height="512"></canvas>
+
+    <script>
+        // --------------------------------------------------
+        // CANVAS
+        // --------------------------------------------------
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+
+        // --------------------------------------------------
+        // WORLD & PLAYER
+        // --------------------------------------------------
+        let x = 256;
+        let y = 256;
+        let speed = 2;
+
+        let targetX = x;
+        let targetY = y;
+        let movingToTarget = false;
+
+        let currentDir = "south";
+        let moving = false;
+
+        const frameCount = 6;
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let frameInterval = 120;
+
+        // --------------------------------------------------
+        // BACKGROUND
+        // --------------------------------------------------
+        const background = new Image();
+        background.src = "pages/background/scene.png";
+
+        // --------------------------------------------------
+        // COLLISION MAP (16x16 tiles, 32px each)
+        // --------------------------------------------------
+        // 16x16 Tilemap (0 = walkable, 1 = blocked)
+        let collisionMap = [];
+
+        async function loadCollisionMap() {
+            const response = await fetch("pages/data/collision_map.json");
+            collisionMap = await response.json();
+        }
+
+        function isBlocked(nx, ny) {
+            const tileX = Math.floor(nx / 32);
+            const tileY = Math.floor(ny / 32);
+            if (tileX < 0 || tileY < 0 || tileX >= 16 || tileY >= 16) return true;
+            return collisionMap[tileY][tileX] === 1;
+        }
+
+        // --------------------------------------------------
+        // LOAD KNIGHT FRAMES
+        // --------------------------------------------------
+        const frames = { east: [], west: [], north: [], south: [] };
+
+        function loadDirection(dir) {
+            for (let i = 0; i < frameCount; i++) {
+                const img = new Image();
+                img.src = `pages/animation/${dir}/frame_${String(i).padStart(3, '0')}.png`;
+                frames[dir].push(img);
+            }
+        }
+
+        ["east", "west", "north", "south"].forEach(loadDirection);
+
+        // --------------------------------------------------
+        // MOUSE CLICK MOVEMENT
+        // --------------------------------------------------
+        canvas.addEventListener("click", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = e.clientX - rect.left;
+            targetY = e.clientY - rect.top;
+            movingToTarget = true;
+        });
+
+        // --------------------------------------------------
+        // UPDATE LOOP
+        // --------------------------------------------------
+        function update(delta) {
+            if (movingToTarget) {
+                const dx = targetX - x;
+                const dy = targetY - y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > speed) {
+                    // Richtung bestimmen
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        currentDir = dx > 0 ? "east" : "west";
+                    } else {
+                        currentDir = dy > 0 ? "south" : "north";
+                    }
+
+                    // Bewegung
+                    const nx = x + (dx / dist) * speed;
+                    const ny = y + (dy / dist) * speed;
+
+                    if (!isBlocked(nx, ny)) {
+                        x = nx;
+                        y = ny;
+                    }
+
+                    moving = true;
+                } else {
+                    movingToTarget = false;
+                    moving = false;
+                }
+            }
+
+            // Animation
+            if (moving) {
+                frameTimer += delta;
+                if (frameTimer > frameInterval) {
+                    currentFrame = (currentFrame + 1) % frameCount;
+                    frameTimer = 0;
+                }
+            } else {
+                currentFrame = 0;
+            }
+        }
+
+        // --------------------------------------------------
+        // DRAW LOOP
+        // --------------------------------------------------
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(background, 0, 0, 512, 512);
+
+            const img = frames[currentDir][currentFrame];
+            if (img.complete) {
+                ctx.drawImage(img, x - 32, y - 32, 64, 64);
+            }
+        }
+
+        function drawCollisionOverlay() {
+            for (let y = 0; y < 16; y++) {
+                for (let x = 0; x < 16; x++) {
+                    if (collisionMap[y][x] === 1) {
+                        ctx.fillStyle = "rgba(255,0,0,0.3)";
+                        ctx.fillRect(x * 32, y * 32, 32, 32);
+                    }
+                }
+            }
+        }
+
+        // --------------------------------------------------
+        // GAME LOOP
+        // --------------------------------------------------
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            const delta = timestamp - lastTime;
+            lastTime = timestamp;
+
+            update(delta);
+            draw();
+            //drawCollisionOverlay()
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        async function startGame() {
+            await loadCollisionMap();
+            requestAnimationFrame(gameLoop);
+        }
+
+        startGame()
+    </script>
+
+</div>
