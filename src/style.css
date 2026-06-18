@@ -1,72 +1,140 @@
 :root {
-    --bg-color: #f4f7f6;
-    --sidebar-color: #031f2c;
-    --accent-color: #bd1e5b;
-    --text-light: #ffffff;
-    --text-dark: #333;
+    /* Futuristic Neon Color Palette */
+    --bg-color: #0a0b10;
+    /* Deep space dark background */
+    --sidebar-color: #0d111a;
+    /* Slightly lighter dark for depth */
+    --accent-neon-pink: #ff007f;
+    /* Hot neon pink */
+    --accent-neon-cyan: #00f3ff;
+    /* Electric cyber cyan */
+    --accent-neon-green: #ffffff;
+    /* Radioactive green */
+    --text-light: #e2e8f0;
+    /* Crisp off-white */
+    --text-dark: #00f3ff;
+    /* Primary headers use cyan */
+
+    /* Glow Effects */
+    --glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.2);
+    --glow-pink: 0 0 10px rgba(255, 0, 127, 0.6), 0 0 20px rgba(255, 0, 127, 0.3);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Switched to a cleaner, more geometric tech font */
+    font-family: 'Orbitron', 'Segoe UI', Roboto, Helvetica, sans-serif;
 }
 
 body {
     background-color: var(--bg-color);
+    color: var(--text-light);
+    /* Subtle digital grid background effect */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 30px 30px;
 }
 
+/* Neon styled standard links */
 .mylinks {
-    color:rgb(62, 76, 197); 
-    border: 0px solid black;
-    padding: 5px;
-    border-radius: 5px;
-    background-color:  #31bd1e00;
+
+    display: inline-block;
+    /* 1. Allows vertical margins and padding to work */
+    margin: 5px;
+    margin-top: 7px;
+    /* 2. Creates a safety bubble around each link */
+
+    color: var(--accent-neon-cyan);
+    border: 1px solid var(--accent-neon-cyan);
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: rgba(0, 243, 255, 0.05);
     text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    margin-right: 7px;
+}
+
+.mylinks:hover {
+    background-color: var(--accent-neon-cyan);
+    color: #000;
+    box-shadow: var(--glow-cyan);
 }
 
 .dashboard-container {
     display: grid;
-    grid-template-columns: 250px 1fr;
-    /* Sidebar Breite 250px, Rest für Content */
+    grid-template-columns: 260px 1fr;
     height: 100vh;
 }
 
-/* Sidebar Styling */
+/* Sidebar Styling - Futuristic Border */
 .sidebar {
     background-color: var(--sidebar-color);
     color: var(--text-light);
-    padding: 2rem 1rem;
+    padding: 2rem 1.5rem;
     display: flex;
     flex-direction: column;
+    border-right: 2px solid rgba(255, 0, 127, 0.3);
+    /* Pink vertical divider */
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
 }
 
+/* Logo with Neon Text Glow */
 .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 3rem;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
     text-align: center;
-    color: var(--accent-color);
+    color: var(--accent-neon-pink);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--glow-pink);
+    margin-top: 1rem;
+}
+
+p {
+
+    font-size: 1.1rem;
+    margin-bottom: 5px;
 }
 
 .sidebar nav ul {
     list-style: none;
 }
 
+/* Nav Links - Tech style with left accent bar on hover */
 .nav-link {
     display: block;
-    color: var(--text-light);
+    color: #a0aec0;
     text-decoration: none;
-    padding: 0.8rem 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 5px;
-    transition: background 0.3s;
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 0.8rem;
+    border-radius: 4px;
+    border-left: 3px solid transparent;
+    transition: all 0.25s ease-in-out;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
 }
 
 .nav-link:hover,
 .nav-link.active {
-    background-color: var(--accent-color);
+    color: #ffffff;
+    background-color: rgba(255, 0, 127, 0.1);
+    border-left: 3px solid var(--accent-neon-pink);
+    box-shadow: inset 0 0 10px rgba(255, 0, 127, 0.2);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Alternate glowing state for active nav if you want cyan instead */
+.nav-link.active {
+    background-color: rgba(0, 243, 255, 0.05);
+    border-left: 3px solid var(--accent-neon-cyan);
 }
 
 /* Hauptinhalt */
@@ -75,7 +143,28 @@ body {
     overflow-y: auto;
 }
 
+/* Neon Cyan Header */
 h1 {
-    margin-bottom: 1rem;
-    color: var(--text-dark);
+    margin-bottom: 2rem;
+    color: var(--accent-neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--glow-cyan);
+    font-weight: 200;
+}
+
+h2 {
+    margin-bottom: 2rem;
+    color: var(--accent-neon-green);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--glow-cyan);
+    font-weight: 200;
+}
+
+.card {
+
+
+    margin-left: 0;
+
 }

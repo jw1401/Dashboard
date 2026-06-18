@@ -46,7 +46,7 @@ const Dashboard = {
             this.contentArea.innerHTML = `
                 <div class="error-box">
                     <h1>Seite nicht gefunden</h1>
-                    <p>Die Ansicht "${pageName}" konnte nicht geladen werden.</p>
+                    <p>Ups... Die Ansicht "${pageName}" konnte nicht geladen werden.</p>
                 </div>`;
         }
     },
