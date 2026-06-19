@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cyber-Brewery: Ginger Beer Automation</title>
+    <style class="dynamic-style">
+        :root {
+            --bg-color: #0a0b10;
+            --panel-color: #0d111a;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff007f;
+            --neon-green: #39ff14;
+            --neon-yellow: #ffee00;
+            --text: #e2e8f0;
+        }
+
+        .center-grid {
+
+            justify-content: center;
+            background-color: var(--bg-color);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Vertikal */
+            height: 70vh;
+            overflow: hidden;
+        }
+
+
+        .subtitle {
+            color: #a0aec0;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 350px 600px;
+            gap: 25px;
+            background: var(--panel-color);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+
+        .phase-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .phase-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #2d3748;
+            padding: 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .phase-card.active {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.05);
+            box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.1);
+        }
+
+        .phase-card.active .phase-title {
+            color: var(--neon-cyan);
+        }
+
+        .phase-card.done {
+            border-color: var(--neon-green);
+            opacity: 0.6;
+        }
+
+        .phase-card.done .phase-title {
+            color: var(--neon-green);
+        }
+
+        .phase-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .phase-desc {
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--neon-cyan);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        button:disabled {
+            border-color: #2d3748;
+            color: #4a5568;
+            cursor: not-allowed;
+            background: none;
+            box-shadow: none;
+        }
+
+        #btn-reset {
+            background: rgba(255, 0, 127, 0.05);
+            border-color: rgba(255, 0, 127, 0.4);
+            color: var(--neon-pink);
+        }
+
+        #btn-reset:hover:not(:disabled) {
+            background: var(--neon-pink);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-pink);
+            border-color: var(--neon-pink);
+        }
+
+        .brew-factory {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 280px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px dashed #2d3748;
+            position: relative;
+        }
+
+        .tank {
+            width: 100px;
+            height: 140px;
+            border: 3px solid #4a5568;
+            border-radius: 4px 4px 15px 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .tank-label {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+        }
+
+        .fluid {
+            width: 100%;
+            height: 0%;
+            transition: height 0.1s linear, background-color 0.5s;
+            position: relative;
+        }
+
+        #fluid-brew {
+            background: rgba(212, 143, 56, 0.8);
+        }
+
+        #fluid-ferment {
+            background: rgba(229, 185, 105, 0.8);
+        }
+
+        .heater {
+            width: 80px;
+            height: 8px;
+            background: #2d3748;
+            margin-top: 5px;
+            border-radius: 2px;
+            transition: background 0.5s, box-shadow 0.5s;
+        }
+
+        .heater.hot {
+            background: var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .pipe-line {
+            width: 60px;
+            height: 6px;
+            background: #2d3748;
+            align-self: center;
+            position: relative;
+        }
+
+        .pipe-line.active {
+            background: var(--neon-cyan);
+        }
+
+        .filter-node {
+            width: 24px;
+            height: 24px;
+            background: #2d3748;
+            border: 2px solid #4a5568;
+            border-radius: 50%;
+            position: absolute;
+            top: -9px;
+            left: 18px;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: border-color 0.3s, color 0.3s;
+        }
+
+        .filter-node.active {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            font-weight: bold;
+        }
+
+        .console-log {
+            background: #050608;
+            border: 1px solid #1a202c;
+            padding: 10px;
+            border-radius: 6px;
+            height: 80px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--neon-green);
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            border-bottom: 2px solid #2d3748;
+        }
+
+        .stat-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-box div {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Cyber-Brewery Engine</h1>
+
+    <h2>Vollautomatisiertes Ginger Beer Brüh- & Gärsystem</h2>
+
+    <p>An interactive, real-time automation simulator for small-scale Ginger Beer production.
+        Monitor the entire automated cycle through three critical system phases: Wort Extraction (Boiling), Inline
+        Filtration (Sieving), and Pressure-Controlled Fermentation. Watch the real-time telemetry balance sugars,
+        temperature, and ABV, while the system's safety protocols automatically regulate CO₂ pressure to prevent
+        containment breach.</p>
+
+    <div class="center-grid">
+        <div class="grid-container">
+            <div class="left-panel">
+                <div class="phase-list">
+                    <div class="phase-card" id="card-p1">
+                        <div class="phase-title">Phase 1: Sud-Extraktion</div>
+                        <div class="phase-desc">Wasser, Ingwer & Zucker im 2.5L Kessel auf 100°C erhitzen und 15 Min.
+                            kochen.</div>
+                    </div>
+                    <div class="phase-card" id="card-p2">
+                        <div class="phase-title">Phase 2: Filtration & Kühlung</div>
+                        <div class="phase-desc">Zitronensaft-Injektion. Automatisches Abseihen der Feststoffe. Abkühlen
+                            auf 25°C.</div>
+                    </div>
+                    <div class="phase-card" id="card-p3">
+                        <div class="phase-title">Phase 3: Gärungs-Zyklus</div>
+                        <div class="phase-desc">Hefe-Injektion im Drucktank. CO₂-Druckaufbau überbachen.</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button id="btn-action" onclick="startSystem()">Anlage Hochfahren</button>
+                    <button id="btn-reset" onclick="resetSystem()">System-Reset (Fluten)</button>
+                </div>
+
+                <div class="console-log" id="system-log">> System bereit. Bitte Startsequenz einleiten...</div>
+            </div>
+
+            <div class="right-panel">
+                <div class="brew-factory">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="tank" id="tank-brew">
+                            <div class="tank-label">2.5L Kessel</div>
+                            <div class="fluid" id="fluid-brew"></div>
+                        </div>
+                        <div class="heater" id="pot-heater"></div>
+                    </div>
+
+                    <div class="pipe-line" id="pipe-1">
+                        <div class="filter-node" id="filter">SIEB</div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="tank" id="tank-ferment" style="height: 160px; border-radius: 15px 15px 8px 8px;">
+                            <div class="tank-label">Drucktank</div>
+                            <div class="fluid" id="fluid-ferment"></div>
+                        </div>
+                        <div style="height:13px;"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box" style="border-color: var(--neon-pink)"><span>Temperatur</span>
+                        <div id="v-temp">20°C</div>
+                    </div>
+                    <div class="stat-box" style="border-color: var(--neon-yellow)"><span>Zuckergehalt</span>
+                        <div id="v-sugar">200g</div>
+                    </div>
+                    <div class="stat-box" style="border-color: var(--neon-cyan)"><span>Alkohol (ABV)</span>
+                        <div id="v-alcohol">0.0%</div>
+                    </div>
+                    <div class="stat-box" style="border-color: var(--neon-green)"><span>Druck</span>
+                        <div id="v-pressure">0.0 bar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentPhase = 0;
+        let timer = null;
+
+        // Sensordaten Struktur
+        let app = {
+            temp: 20,
+            sugar: 200,
+            alcohol: 0,
+            pressure: 0,
+            brewVolume: 0,
+            fermentVolume: 0,
+            minutesPassed: 0
+        };
+
+        const log = document.getElementById('system-log');
+
+        function writeLog(text) {
+            log.innerHTML = `&gt; ${text}<br>` + log.innerHTML;
+        }
+
+        function updateUI() {
+            document.getElementById('v-temp').innerText = Math.round(app.temp) + "°C";
+            document.getElementById('v-sugar').innerText = Math.round(app.sugar) + "g";
+            document.getElementById('v-alcohol').innerText = app.alcohol.toFixed(1) + "%";
+            document.getElementById('v-pressure').innerText = app.pressure.toFixed(1) + " bar";
+
+            document.getElementById('fluid-brew').style.height = app.brewVolume + "%";
+            document.getElementById('fluid-ferment').style.height = app.fermentVolume + "%";
+        }
+
+        function startSystem() {
+            document.getElementById('btn-action').disabled = true;
+            runPhase1();
+        }
+
+        // PHASE 1: KOCHEN
+        function runPhase1() {
+            currentPhase = 1;
+            document.getElementById('card-p1').className = 'phase-card active';
+            document.getElementById('pot-heater').classList.add('hot');
+            writeLog("Befülle 2.5L Kessel mit 1.8L Wasser, Ingwer & Zucker...");
+
+            app.brewVolume = 80;
+            updateUI();
+
+            timer = setInterval(() => {
+                if (app.temp < 100) {
+                    app.temp += 5;
+                    if (app.temp >= 100) writeLog("Siedepunkt erreicht. Koche Extrakt für 15 Minuten...");
+                } else {
+                    app.minutesPassed++;
+                    if (app.minutesPassed >= 15) {
+                        clearInterval(timer);
+                        document.getElementById('card-p1').className = 'phase-card done';
+                        document.getElementById('pot-heater').classList.remove('hot');
+                        runPhase2();
+                    }
+                }
+                updateUI();
+            }, 100);
+        }
+
+        // PHASE 2: SIEBEN & KÜHLEN
+        function runPhase2() {
+            currentPhase = 2;
+            document.getElementById('card-p2').className = 'phase-card active';
+            writeLog("Kochende Phase beendet. Injektiere Zitronensaft...");
+            writeLog("Öffne Transferventile. Starte Filtration über Maschensieb...");
+
+            document.getElementById('pipe-1').classList.add('active');
+            document.getElementById('filter').classList.add('active');
+
+            timer = setInterval(() => {
+                if (app.brewVolume > 0) {
+                    app.brewVolume -= 5;
+                    app.fermentVolume += 5;
+                } else {
+                    document.getElementById('pipe-1').classList.remove('active');
+                    document.getElementById('filter').classList.remove('active');
+
+                    if (app.temp > 25) {
+                        app.temp -= 3;
+                        if (app.temp <= 30 && app.temp > 25) writeLog("Temperatur fällt unter kritischen Wert. Bereite Hefe-Injektion vor...");
+                    } else {
+                        clearInterval(timer);
+                        document.getElementById('card-p2').className = 'phase-card done';
+                        runPhase3();
+                    }
+                }
+                updateUI();
+            }, 100);
+        }
+
+        // PHASE 3: HEFE & GÄRUNG
+        function runPhase3() {
+            currentPhase = 3;
+            document.getElementById('card-p3').className = 'phase-card active';
+            writeLog("Injektiere 1/4 TL Trockenhefe in den Drucktank.");
+            writeLog("Drucktank hermetisch versiegelt. Fermentation initiiert...");
+
+            app.minutesPassed = 0;
+
+            timer = setInterval(() => {
+                app.minutesPassed += 2;
+
+                if (app.sugar > 15) {
+                    let rate = 1.5;
+                    app.sugar -= rate;
+                    app.alcohol += rate * 0.025;
+                    app.pressure += rate * 0.035;
+
+                    if (Math.random() < 0.4) createFermentBubble();
+                }
+
+                updateUI();
+
+                if (app.pressure >= 2.5 && app.pressure < 4.0) {
+                    writeLog("Kritischer Druck erreicht! Aktiviere Kühlschrank-Modus (Gärstopp)...");
+                    app.temp = 8;
+                }
+
+                if (app.temp === 8) {
+                    clearInterval(timer);
+                    writeLog("⚡ Prozedur erfolgreich! Gärung gestoppt. Alkohol: " + app.alcohol.toFixed(1) + "% | Druck stabil bei: " + app.pressure.toFixed(1) + " bar.");
+                    document.getElementById('card-p3').className = 'phase-card done';
+                    document.getElementById('tank-ferment').style.borderColor = "var(--neon-green)";
+                    document.getElementById('tank-ferment').style.background = "rgba(57, 255, 20, 0.05)";
+                }
+
+                if (app.pressure >= 4.5) {
+                    clearInterval(timer);
+                    writeLog("💥 SYSTEMFEHLER: DRUCKTANK EXPLODIERT! Gärstopp versäumt.");
+                    document.getElementById('tank-ferment').style.borderColor = "var(--neon-pink)";
+                    document.getElementById('tank-ferment').style.background = "rgba(255, 0, 127, 0.2)";
+                    document.getElementById('card-p3').className = 'phase-card done';
+                }
+
+            }, 200);
+        }
+
+        function createFermentBubble() {
+            const f = document.getElementById('fluid-ferment');
+            const b = document.createElement('div');
+            b.style.position = "absolute";
+            b.style.background = "rgba(255,255,255,0.4)";
+            b.style.borderRadius = "50%";
+            let size = Math.random() * 5 + 2;
+            b.style.width = size + "px";
+            b.style.height = size + "px";
+            b.style.left = Math.random() * 90 + "px";
+            b.style.bottom = "0px";
+
+            f.appendChild(b);
+
+            let pos = 0;
+            let bubbleTimer = setInterval(() => {
+                pos += 2;
+                b.style.transform = `translateY(-${pos}px)`;
+                if (pos > 100) { clearInterval(bubbleTimer); b.remove(); }
+            }, 20);
+        }
+
+        // NEU: DER RESET-PROZESS OHNE RELOAD
+        function resetSystem() {
+            // 1. Alle aktiven Interval-Timer killen
+            clearInterval(timer);
+
+            // 2. Variablen komplett zurücksetzen
+            app.temp = 20;
+            app.sugar = 200;
+            app.alcohol = 0;
+            app.pressure = 0;
+            app.brewVolume = 0;
+            app.fermentVolume = 0;
+            app.minutesPassed = 0;
+            currentPhase = 0;
+
+            // 3. UI-Elemente bereinigen (Farben & Flüssigkeiten)
+            updateUI();
+
+            // Heizelemente und Rohre abschalten
+            document.getElementById('pot-heater').className = 'heater';
+            document.getElementById('pipe-1').className = 'pipe-line';
+            document.getElementById('filter').className = 'filter-node';
+
+            // Tank-Designs zurücksetzen
+            const tankFerment = document.getElementById('tank-ferment');
+            tankFerment.style.borderColor = "#4a5568";
+            tankFerment.style.background = "none";
+            document.getElementById('fluid-ferment').innerHTML = ""; // Bläschen löschen
+
+            // 4. Phasen-Karten zurücksetzen
+            document.getElementById('card-p1').className = 'phase-card';
+            document.getElementById('card-p2').className = 'phase-card';
+            document.getElementById('card-p3').className = 'phase-card';
+
+            // 5. Start-Button wieder freigeben
+            document.getElementById('btn-action').disabled = false;
+
+            // 6. Konsole leeren und Neustart vermerken
+            log.innerHTML = "> System gereinigt & zurückgesetzt. Bereit für neue Sequenz.";
+        }
+    </script>
+</body>
+
+</html>

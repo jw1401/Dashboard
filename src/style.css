@@ -155,11 +155,15 @@ h1 {
 
 h2 {
     margin-bottom: 2rem;
-    color: var(--accent-neon-green);
+    color: #a0aec0;
     text-transform: uppercase;
     letter-spacing: 2px;
     text-shadow: var(--glow-cyan);
     font-weight: 200;
+}
+
+p{
+    color: #a0aec0;
 }
 
 .card {
